@@ -8,13 +8,14 @@ import SignInButton from "../Auth/SignInButton";
 import SignUpButton from "../Auth/SignUpButton";
 import LocaleController from "../Locale/LocaleController";
 import ThemeController from "../Theme/ThemeController";
+import CreateJobButton from "../Job/CreateJobButton";
 
 const NavBar = () => {
   const { t } = useLocale();
   const { auth } = useAuth();
 
   return (
-    <div class="sticky top-0 z-10 flex h-20 w-full flex-row items-center justify-between p-4 backdrop-blur">
+    <div class="sticky top-0 z-10 flex h-20 w-full flex-row items-center justify-between p-4 shadow-sm backdrop-blur">
       <label for="my-drawer-2" class="btn btn-primary drawer-button xl:hidden">
         <FiMenu class="h-6 w-6" />
       </label>
@@ -42,7 +43,7 @@ const NavBar = () => {
           <div class="flex flex-row items-center justify-center gap-6">
             <FiMessageCircle class="h-6 w-6" />
             <FiBell class="h-6 w-6" />
-            <button class="btn btn-primary">Create job</button>
+            <CreateJobButton />
           </div>
         </div>
       </Show>

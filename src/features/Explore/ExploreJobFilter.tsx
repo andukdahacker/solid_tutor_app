@@ -1,26 +1,22 @@
 import { FiFilter } from "solid-icons/fi";
-import { createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { batch, createSignal } from "solid-js";
+import { createStore, unwrap } from "solid-js/store";
 import Modal from "../../common/components/Modal/Modal";
 import { JobMethod } from "../../schema/entities";
+import { useExploreJob } from "./context/ExploreJobContext";
 
 interface JobFilter {
   minFee: number;
   jobMethod: JobMethod;
 }
 
-interface ExploreJobFilterProps {
-  minFee?: number;
-  jobMethod?: JobMethod;
-  onApplyFilter: (params: JobFilter) => void;
-}
-
-const ExploreJobFilter = (props: ExploreJobFilterProps) => {
+const ExploreJobFilter = () => {
+  const { setParams, params } = useExploreJob();
   const [isOpen, setIsOpen] = createSignal(false);
 
   const [localParams, setLocalParams] = createStore<JobFilter>({
-    minFee: props.minFee ?? 0,
-    jobMethod: props.jobMethod ?? "BOTH",
+    minFee: unwrap(params.minFee) ?? 0,
+    jobMethod: unwrap(params.jobMethod) ?? "BOTH",
   });
 
   return (
@@ -91,7 +87,10 @@ const ExploreJobFilter = (props: ExploreJobFilterProps) => {
               class="btn btn-primary"
               onClick={() => {
                 setIsOpen(false);
-                props.onApplyFilter(localParams);
+                batch(() => {
+                  setParams("jobMethod", localParams.jobMethod);
+                  setParams("minFee", localParams.minFee);
+                });
               }}
             >
               Apply

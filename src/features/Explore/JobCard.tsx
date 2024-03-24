@@ -1,13 +1,18 @@
+import { A } from "@solidjs/router";
 import CurrencyUtils from "../../common/utils/currency_utils";
 import DatetimeUtils from "../../common/utils/datetime_utils";
 import { Job } from "../../schema/entities";
-import ApplyButton from "./ApplyButton";
+import { useAuth } from "../../providers/AuthProvider";
+import JobActionButton from "../Job/JobActionButton";
+import { useExploreJob } from "./context/ExploreJobContext";
 
 interface JobCardProps {
   job: Job;
 }
 
 const JobCard = (props: JobCardProps) => {
+  const { handleOnJobApplySuccess, handleOnJobUndoApplySuccess } =
+    useExploreJob();
   const latestUpdate =
     props.job.createdAt == props.job.updatedAt
       ? `Posted ${DatetimeUtils.ago(props.job.createdAt)} ago`
@@ -44,8 +49,18 @@ const JobCard = (props: JobCardProps) => {
           </div>
         </div>
         <div class="card-actions mt-6 justify-end">
-          <button class="btn btn-outline btn-sm mr-4">See more</button>
-          <ApplyButton />
+          <A href={`/job/${props.job.id}`} class="btn btn-outline btn-sm w-24">
+            See more
+          </A>
+          <JobActionButton
+            job={props.job}
+            onApplySuccess={(result) =>
+              handleOnJobApplySuccess(props.job.id, result)
+            }
+            onUndoSuccess={() => handleOnJobUndoApplySuccess(props.job.id)}
+            applyBtnClass="btn btn-primary btn-sm w-24"
+            requestedBtnClass="btn btn-primary btn-sm w-24"
+          />
         </div>
       </div>
     </div>

@@ -7,43 +7,11 @@ import { FindManyTutorsInput } from "../../schema/inputs";
 import ExploreService from "../../services/explore_service";
 import ExploreTutorFilter from "./ExploreTutorFilter";
 import TutorCard from "./TutorCard";
+import { useExploreTutor } from "./context/ExploreTutorContext";
 
-interface ExploreTutorProps {
-  searchInput: Accessor<string>;
-}
-
-const ExploreTutor = (props: ExploreTutorProps) => {
-  const initialInput = () => props.searchInput();
-  const [params, setParams] = createStore<FindManyTutorsInput>({
-    searchString: initialInput(),
-    take: 10,
-  });
-
-  const { data, error, loading, refetch, fetchMore } = createPaginatedQuery({
-    params: params,
-    queryFn: async (input) =>
-      await ExploreService.findManyTutors(input as FindManyTutorsInput),
-  });
-
-  const handleFetchMore = async (e: Event) => {
-    const left = window.scrollX;
-    const top = window.scrollY;
-    if (data.pageInfo?.hasNextPage) {
-      await fetchMore({
-        ...params,
-        stringCursor: (data.pageInfo?.cursor as string) ?? "",
-      });
-    }
-    window.scrollTo({ left, top, behavior: "instant" });
-  };
-
-  const trigger = debounce((input: string) => {
-    setParams("searchString", input);
-  }, 500);
-
-  createEffect(() => {
-    trigger(props.searchInput());
-  });
+const ExploreTutor = () => {
+  const { data, loading, error, handleFetchMore, isFetchingMore } =
+    useExploreTutor();
 
   return (
     <div class="flex flex-col items-center justify-center">
@@ -65,8 +33,13 @@ const ExploreTutor = (props: ExploreTutorProps) => {
             <button
               class="btn btn-primary btn-sm mb-10"
               onClick={handleFetchMore}
+              disabled={isFetchingMore()}
             >
-              Load more
+              {isFetchingMore() ? (
+                <span class="loading loading-ring loading-sm text-base-content" />
+              ) : (
+                "Load more"
+              )}
             </button>
           </Show>
         </Match>

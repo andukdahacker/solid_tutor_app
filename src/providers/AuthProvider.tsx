@@ -36,10 +36,12 @@ export const AuthProvider = (props: ParentProps) => {
     onSuccess: (result) => {
       setAuth("authenticated", true);
       setAuth("user", result);
+      return result;
     },
-    onError: (_error) => {
+    onError: (error) => {
       setAuth("authenticated", false);
       setAuth("user", null);
+      return error;
     },
   });
 

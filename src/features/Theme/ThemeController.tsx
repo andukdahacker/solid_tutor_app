@@ -2,10 +2,10 @@ import { createEffect, createSignal } from "solid-js";
 import { FiSun, FiMoon } from "solid-icons/fi";
 
 const ThemeController = () => {
-  const [theme, setTheme] = createSignal<"light" | "dark">("light");
+  const [theme, setTheme] = createSignal<"synthwave" | "fantasy">("fantasy");
 
   createEffect(() => {
-    document.querySelector("html")?.setAttribute("data-theme", theme());
+    document.querySelector("html")?.setAttribute("data-theme", "dim");
   });
 
   return (
@@ -14,7 +14,7 @@ const ThemeController = () => {
         <input
           type="checkbox"
           onClick={() =>
-            setTheme((theme) => (theme == "light" ? "dark" : "light"))
+            setTheme((theme) => (theme == "fantasy" ? "synthwave" : "fantasy"))
           }
         />
 

@@ -21,7 +21,7 @@ const Avatar = (props: AvatarProps) => {
           <img src={props.src} />
         </Show>
         <Show when={!props.src}>
-          <span>{props.name.charAt(0)}</span>
+          <span class="text-lg font-semibold">{props.name.charAt(0)}</span>
         </Show>
       </div>
     </div>

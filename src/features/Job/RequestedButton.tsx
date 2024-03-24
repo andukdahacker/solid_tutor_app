@@ -1,0 +1,67 @@
+import { JSX } from "solid-js";
+import { Job, JobConnection } from "../../schema/entities";
+import { c } from "vite/dist/node/types.d-AKzkD8vd";
+import createMutation from "../../common/hooks/createMutation";
+import JobService from "../../services/job_service";
+import { DeleteJobConnectionInput } from "../../schema/inputs";
+import { useAuth } from "../../providers/AuthProvider";
+import toast from "solid-toast";
+import Loading from "../../common/components/LoadingIndicator/Loading";
+
+interface RequestedButtonProps {
+  job: Job;
+  requestedButtonClass?: JSX.HTMLElementTags["button"]["class"];
+  onUndoSuccess?: () => void;
+}
+
+const RequestedButton = (props: RequestedButtonProps) => {
+  const { auth } = useAuth();
+  const { isLoading, mutate } = createMutation({
+    mutate: async (input: DeleteJobConnectionInput) =>
+      await JobService.deleteJobConnection(input),
+    onSuccess: (result) => {
+      toast.success("Undo apply for job successfully");
+      props.onUndoSuccess?.();
+      return result;
+    },
+    onError: (error) => {
+      toast.error("Undo apply for job failed");
+      return error;
+    },
+  });
+
+  return (
+    <>
+      <div class="dropdown dropdown-bottom min-w-fit">
+        <div
+          tabindex="0"
+          role="button"
+          class={props.requestedButtonClass ?? "btn btn-primary"}
+        >
+          {isLoading() ? (
+            <span class="loading loading-ring loading-sm" />
+          ) : (
+            "Applied"
+          )}
+        </div>
+        <ul
+          tabindex="0"
+          class="menu dropdown-content z-[1] min-w-fit rounded-box bg-base-100 p-2 shadow"
+        >
+          <li
+            onClick={() =>
+              mutate({
+                jobId: props.job.id,
+                tutorId: auth.user?.tutorProfile.id ?? "",
+              })
+            }
+          >
+            <a>Undo</a>
+          </li>
+        </ul>
+      </div>
+    </>
+  );
+};
+
+export default RequestedButton;

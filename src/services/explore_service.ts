@@ -1,16 +1,16 @@
 import {
-    Job,
-    JobConnection,
-    Paginated,
-    Subject,
-    TutorProfile,
+  Job,
+  JobConnection,
+  Paginated,
+  Subject,
+  TutorProfile,
 } from "../schema/entities";
 import {
-    CreateJobConnectionInput,
-    DeleteJobConnectionInput,
-    FindManyJobsInput,
-    FindManySubjectsInput,
-    FindManyTutorsInput,
+  CreateJobConnectionInput,
+  DeleteJobConnectionInput,
+  FindManyJobsInput,
+  FindManySubjectsInput,
+  FindManyTutorsInput,
 } from "../schema/inputs";
 import client from "./client";
 import { Result } from "./result";
@@ -50,37 +50,6 @@ class ExploreService {
     try {
       const response = await client.POST("/job-connection", {
         body: { ...input },
-      });
-
-      if (response.error) {
-        return {
-          ok: false,
-          error: new Error(response.error.message),
-        };
-      }
-
-      return {
-        ok: true,
-        value: response.data,
-      };
-    } catch (error) {
-      console.log(error);
-
-      return {
-        ok: false,
-        error: new Error(),
-      };
-    }
-  }
-
-  static async deleteJobConnection(
-    input: DeleteJobConnectionInput,
-  ): Promise<Result<JobConnection>> {
-    try {
-      const response = await client.POST("/job-connection/delete", {
-        body: {
-          ...input,
-        },
       });
 
       if (response.error) {

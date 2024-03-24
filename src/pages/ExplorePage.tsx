@@ -4,6 +4,8 @@ import { ExploreType } from "../common/types/explore_type";
 import ExploreJob from "../features/Explore/ExploreJob";
 import ExploreSearchBar from "../features/Explore/ExploreSearchBar";
 import ExploreTutor from "../features/Explore/ExploreTutor";
+import ExploreJobProvider from "../features/Explore/context/ExploreJobContext";
+import ExploreTutorProvider from "../features/Explore/context/ExploreTutorContext";
 
 const ExplorePage = () => {
   const [searchInput, setSearchInput] = createSignal("");
@@ -44,10 +46,14 @@ const ExplorePage = () => {
         <div class="mt-10">
           <Switch>
             <Match when={exploreType() == "jobs"}>
-              <ExploreJob searchInput={searchInput} />
+              <ExploreJobProvider searchInput={searchInput}>
+                <ExploreJob />
+              </ExploreJobProvider>
             </Match>
             <Match when={exploreType() == "tutors"}>
-              <ExploreTutor searchInput={searchInput} />
+              <ExploreTutorProvider searchInput={searchInput}>
+                <ExploreTutor />
+              </ExploreTutorProvider>
             </Match>
           </Switch>
         </div>

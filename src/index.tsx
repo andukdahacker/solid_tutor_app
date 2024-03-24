@@ -10,6 +10,7 @@ import LandingPage from "./pages/LandingPage";
 import LearnerDashboard from "./pages/LearnerDashboard";
 import ProfilePage from "./pages/ProfilePage";
 import TutorDashboard from "./pages/TutorDashboard";
+import JobDetailPage from "./pages/JobDetailPage";
 
 const root = document.getElementById("root");
 
@@ -30,6 +31,7 @@ render(
       />
       <Route path={RoutesPath.tutorDashboardPage} component={TutorDashboard} />
       <Route path={RoutesPath.profilePage} component={ProfilePage} />
+      <Route path={RoutesPath.jobDetail} component={JobDetailPage} />
     </Router>
   ),
   root!,

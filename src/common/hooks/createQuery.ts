@@ -1,21 +1,24 @@
 import { Accessor, createEffect, createSignal, onMount } from "solid-js";
 import { Result } from "../../services/result";
+import { debounce } from "@solid-primitives/scheduled";
 
 type QueryOptions<Response, Params> = {
-  params?: Params;
+  params?: Accessor<Params>;
   queryFn: (params?: Params) => Promise<Result<Response>>;
   onSuccess?: (result: Response) => Response;
   onError?: (error: Error) => Error;
   enabled?: () => boolean;
+  debounce?: number;
 };
 
 function createQuery<Response, Params>(
   options: QueryOptions<Response, Params>,
 ) {
-  const [data, setData] = createSignal<Response | undefined>(undefined);
-  const [error, setError] = createSignal<Error | undefined>(undefined);
+  const [data, setData] = createSignal<Response>();
+  const [error, setError] = createSignal<Error>();
   const [loading, setLoading] = createSignal(false);
 
+  const params = () => options.params ?? undefined;
   const enabled = () => {
     if (!options.enabled) return true;
 
@@ -26,7 +29,9 @@ function createQuery<Response, Params>(
     if (!enabled()) return;
     setLoading(true);
     const result = await options.queryFn(params);
-    setLoading(false);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
 
     if (result.ok) {
       let finalValue = result.value;
@@ -47,17 +52,22 @@ function createQuery<Response, Params>(
     }
   };
 
+  const trigger = debounce(
+    (params?: Params) => refetch(params),
+    options.debounce ?? 0,
+  );
+
   onMount(async () => {
-    await refetch(options.params ?? undefined);
+    await refetch(options.params?.() ?? undefined);
   });
 
-  if (options.params) {
+  if (params()) {
     createEffect(async () => {
-      await refetch(options.params ?? undefined);
+      trigger(options.params?.() ?? undefined);
     });
   }
 
-  return { data, error, loading, refetch };
+  return { data, setData, error, loading, refetch };
 }
 
 export default createQuery;

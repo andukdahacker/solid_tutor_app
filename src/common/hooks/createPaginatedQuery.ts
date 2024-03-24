@@ -31,9 +31,15 @@ function createPaginatedQuery<Response, Params>(
 
   const refetch = async (params?: Params) => {
     if (!enabled()) return;
-    setIsFetchingMore(true);
+    setLoading(true);
     const result = await options.queryFn(params);
-    setIsFetchingMore(false);
+
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        setLoading(false);
+        resolve(null);
+      }, 1000),
+    );
 
     if (result.ok) {
       let finalValue = result.value;
@@ -59,9 +65,14 @@ function createPaginatedQuery<Response, Params>(
 
   const fetchMore = async (params?: Params) => {
     if (!enabled()) return;
-    setLoading(true);
+    setIsFetchingMore(true);
     const result = await options.queryFn(params);
-    setLoading(false);
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        setIsFetchingMore(false);
+        resolve(null);
+      }, 1000),
+    );
 
     if (result.ok) {
       let finalValue = result.value;
@@ -95,7 +106,7 @@ function createPaginatedQuery<Response, Params>(
     });
   }
 
-  return { data, error, loading, refetch, fetchMore, isFetchingMore };
+  return { data, setData, error, loading, refetch, fetchMore, isFetchingMore };
 }
 
 export default createPaginatedQuery;

@@ -15,7 +15,13 @@ function createMutation<Response, Params>(
   const mutate = async (params: Params) => {
     setIsLoading(true);
     const result = await options.mutate(params);
-    setIsLoading(false);
+
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        setIsLoading(false);
+        resolve(null);
+      }, 1000),
+    );
 
     if (result.ok) {
       options.onSuccess(result.value);
