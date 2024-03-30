@@ -1,8 +1,8 @@
 import { ReactiveMap } from "@solid-primitives/map";
-import { batch, createSignal } from "solid-js";
+import { Accessor, batch, createEffect, createSignal } from "solid-js";
 
 type FieldState = {
-  ref: HTMLInputElement | HTMLSelectElement;
+  ref: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
   errors: string | string[] | null;
   touched: boolean;
   validator?: (val: string) => string | null;
@@ -14,11 +14,16 @@ function createForm<T extends Record<string, any>>(initialValues: T) {
   >(new ReactiveMap());
 
   const register = (
-    el: HTMLInputElement | HTMLSelectElement,
+    el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
     field: keyof T,
     validator?: (val: string) => string | null,
   ) => {
-    el.value = initialValues[field];
+    const isInputElement = el instanceof HTMLInputElement;
+    if (isInputElement && el.type == "checkbox") {
+      el.checked = initialValues[field];
+    } else {
+      el.value = initialValues[field];
+    }
 
     setFieldMapState((map) =>
       map.set(field, {
@@ -97,7 +102,16 @@ function createForm<T extends Record<string, any>>(initialValues: T) {
       const key = field.value[0] as string;
       const value = field.value[1];
 
-      v[key] = value.ref.value;
+      const targetField = value.ref;
+      const isCheckBox =
+        targetField instanceof HTMLInputElement &&
+        targetField.type == "checkbox";
+
+      if (isCheckBox) {
+        v[key] = targetField.checked;
+      } else {
+        v[key] = targetField.value;
+      }
 
       field = iter.next();
     }
@@ -118,7 +132,69 @@ function createForm<T extends Record<string, any>>(initialValues: T) {
     }
   };
 
-  return { register, validate, handleSubmit, fieldMap, setError };
+  const setField = (field: keyof T, value: string) => {
+    const targetField = fieldMap().get(field);
+
+    if (targetField) {
+      setFieldMapState((map) =>
+        map.set(field, {
+          ...targetField,
+          ref: {
+            ...targetField.ref,
+            value,
+          },
+        }),
+      );
+    }
+  };
+
+  const resetFieldMap = (values: T) => {
+    batch(() => {
+      const iter = fieldMap().entries();
+      let field = iter.next();
+
+      while (!field.done) {
+        const key = field.value[0];
+        const value = field.value[1];
+
+        const newValue = values[key];
+
+        setFieldMapState((map) =>
+          map.set(key, { ...value, ref: { ...value.ref, value: newValue } }),
+        );
+        field = iter.next();
+      }
+    });
+  };
+
+  const watch = (field: keyof T) => {
+    const initialFieldValue = initialValues[field];
+    const [value, setValue] = createSignal<typeof initialFieldValue>();
+
+    createEffect(() => {
+      const targetField = fieldMap().get(field)?.ref;
+      const isInputElement = targetField instanceof HTMLInputElement;
+      const isCheckBox = targetField?.type == "checkbox";
+      if (isInputElement && isCheckBox) {
+        setValue(targetField.checked as typeof initialFieldValue);
+      } else {
+        setValue(fieldMap().get(field)?.ref.value as typeof initialFieldValue);
+      }
+    });
+
+    return value;
+  };
+
+  return {
+    register,
+    validate,
+    handleSubmit,
+    fieldMap,
+    setError,
+    setField,
+    resetFieldMap,
+    watch,
+  };
 }
 
 export default createForm;

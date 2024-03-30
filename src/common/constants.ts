@@ -5,6 +5,6 @@ export const RoutesPath = {
   explorePage: "/explore",
   learnerDashboardPage: "/learner-dashboard",
   tutorDashboardPage: "/tutor-dashboard",
-  profilePage: "/profile/:id?",
+  profilePage: "/profile/:id",
   jobDetail: "/job/:id",
 } as const;

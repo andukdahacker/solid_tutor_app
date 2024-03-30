@@ -14,7 +14,6 @@ export type Paginated<T> = {
   pageInfo: components["schemas"]["PageInfoType"] | undefined;
 };
 export type JobMethod = components["schemas"]["JobMethod"];
-export type JobType = components["schemas"]["JobType"];
 export type Education = components["schemas"]["EducationEntity"];
 export type TutorProfileSubject =
   components["schemas"]["TutorProfileSubjectEntity"];

@@ -11,8 +11,14 @@ export interface paths {
   "/user": {
     get: operations["UserController_getUser"];
   };
+  "/user/{id}": {
+    get: operations["UserController_getUserProfileById"];
+  };
   "/user/upload/avatar": {
     post: operations["UserController_uploadAvatar"];
+  };
+  "/tutor-profile/list": {
+    get: operations["TutorProfileController_tutorProfiles"];
   };
   "/tutor-profile/{userId}": {
     get: operations["TutorProfileController_getTutorProfile"];
@@ -21,9 +27,6 @@ export interface paths {
     put: operations["TutorProfileController_updateTutorProfile"];
     post: operations["TutorProfileController_createTutorProfile"];
     delete: operations["TutorProfileController_deleteTutorProfileSubject"];
-  };
-  "/tutor-profile/list": {
-    get: operations["TutorProfileController_tutorProfiles"];
   };
   "/learner-profile/{userId}": {
     get: operations["LearnerProfileController_getLearnerProfile"];
@@ -89,16 +92,18 @@ export interface paths {
     post: operations["ChatController_createChat"];
   };
   "/job": {
+    put: operations["JobController_updateJob"];
     post: operations["JobController_createJob"];
+  };
+  "/job/{jobId}": {
+    get: operations["JobController_findJobById"];
+    delete: operations["JobController_deleteJob"];
   };
   "/job/list": {
     get: operations["JobController_jobs"];
   };
   "/job/learner": {
     get: operations["JobController_getJobsByLearnerId"];
-  };
-  "/job/{jobId}": {
-    get: operations["JobController_findJobById"];
   };
   "/subject": {
     get: operations["SubjectController_subjects"];
@@ -134,18 +139,14 @@ export interface components {
       name: string;
       description: string;
     };
-    /** @enum {string} */
-    JobType: "QA" | "TUTOR";
-    /** @enum {string} */
-    JobMethod: "ONLINE" | "OFFLINE" | "BOTH";
-    /** @enum {string} */
-    JobStatus: "OPEN" | "EMPLOYED" | "DONE";
     TutorProfileSubjectEntity: {
       tutorId: string;
       tutorProfile?: components["schemas"]["TutorProfileEntity"] | null;
       subjectId: string;
       subject?: components["schemas"]["SubjectEntity"] | null;
     };
+    /** @enum {string} */
+    JobMethod: "ONLINE" | "OFFLINE" | "BOTH";
     TutorProfileEntity: {
       userId: string;
       id: string;
@@ -155,44 +156,6 @@ export interface components {
       /** Format: int64 */
       tutorFee?: number;
       jobMethod?: components["schemas"]["JobMethod"];
-    };
-    /** @enum {string} */
-    ConnectionStatus: "REQUESTED" | "ACCEPTED" | "DECLINED";
-    /** @enum {string} */
-    JobConnectionType: "TUTOR_TO_JOB" | "JOB_TO_TUTOR";
-    JobConnectionEntity: {
-      jobId: string;
-      job?: components["schemas"]["JobEntity"];
-      tutorId: string;
-      tutor?: components["schemas"]["TutorProfileEntity"];
-      status: components["schemas"]["ConnectionStatus"];
-      type: components["schemas"]["JobConnectionType"];
-      createdAt: number;
-    };
-    JobEntity: {
-      id: string;
-      learner: components["schemas"]["LearnerProfileEntity"];
-      learnerId: string;
-      subjectId: string;
-      subject: components["schemas"]["SubjectEntity"];
-      title: string;
-      description: string;
-      /** Format: int64 */
-      fee: number;
-      numberOfSessions: number;
-      createdAt: number;
-      updatedAt: number;
-      jobType: components["schemas"]["JobType"];
-      jobMethod: components["schemas"]["JobMethod"];
-      jobStatus: components["schemas"]["JobStatus"];
-      jobConnections: components["schemas"]["JobConnectionEntity"][];
-    };
-    LearnerProfileEntity: {
-      id: string;
-      bio: string;
-      userId: string;
-      user?: components["schemas"]["UserEntity"] | null;
-      jobs: components["schemas"]["JobEntity"][];
     };
     WorkExperienceEntity: {
       description: string;
@@ -229,10 +192,58 @@ export interface components {
       education: components["schemas"]["EducationEntity"][];
       updatedAt: number;
     };
+    /** @enum {string} */
+    JobStatus: "OPEN" | "EMPLOYED" | "DONE";
+    /** @enum {string} */
+    ConnectionStatus: "REQUESTED" | "ACCEPTED" | "DECLINED";
+    /** @enum {string} */
+    JobConnectionType: "TUTOR_TO_JOB" | "JOB_TO_TUTOR";
+    JobConnectionEntity: {
+      jobId: string;
+      job?: components["schemas"]["JobEntity"];
+      tutorId: string;
+      tutor?: components["schemas"]["TutorProfileEntity"];
+      status: components["schemas"]["ConnectionStatus"];
+      type: components["schemas"]["JobConnectionType"];
+      createdAt: number;
+    };
+    JobEntity: {
+      id: string;
+      learner: components["schemas"]["LearnerProfileEntity"];
+      learnerId: string;
+      subjectId: string;
+      subject: components["schemas"]["SubjectEntity"];
+      title: string;
+      description: string;
+      /** Format: int64 */
+      fee: number;
+      numberOfSessions: number;
+      createdAt: number;
+      updatedAt: number;
+      jobMethod: components["schemas"]["JobMethod"];
+      jobStatus: components["schemas"]["JobStatus"];
+      jobConnections: components["schemas"]["JobConnectionEntity"][];
+    };
+    LearnerProfileEntity: {
+      id: string;
+      bio: string;
+      userId: string;
+      user?: components["schemas"]["UserEntity"] | null;
+      jobs: components["schemas"]["JobEntity"][];
+    };
     ErrorResponse: {
       statusCode: number;
       message: string;
       error: string;
+    };
+    PageInfoType: {
+      hasNextPage: boolean;
+      cursor: string | number;
+      lastTake: number;
+      totalAmount: number;
+    };
+    Paginated: {
+      pageInfo: components["schemas"]["PageInfoType"];
     };
     CreateTutorProfileInput: Record<string, never>;
     UpdateTutorProfileInput: {
@@ -245,15 +256,6 @@ export interface components {
     DeleteTutorProfileSubjectInput: {
       subjectId: string;
       tutorProfileId: string;
-    };
-    PageInfoType: {
-      hasNextPage: boolean;
-      cursor: string | number;
-      lastTake: number;
-      totalAmount: number;
-    };
-    Paginated: {
-      pageInfo: components["schemas"]["PageInfoType"];
     };
     CreateLearnerProfileInput: {
       bio: string;
@@ -336,8 +338,18 @@ export interface components {
       fee: number;
       title: string;
       numberOfSessions: number;
-      jobType: components["schemas"]["JobType"];
       jobMethod: components["schemas"]["JobMethod"];
+    };
+    UpdateJobInput: {
+      id: string;
+      subjectId?: string;
+      description?: string;
+      /** Format: int64 */
+      fee?: number;
+      title?: string;
+      numberOfSessions: number;
+      jobMethod?: components["schemas"]["JobMethod"];
+      jobStatus?: components["schemas"]["JobStatus"];
     };
     /** @enum {string} */
     SortBy: "asc" | "desc";
@@ -425,10 +437,62 @@ export interface operations {
       };
     };
   };
+  UserController_getUserProfileById: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["UserEntity"];
+        };
+      };
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      500: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
   UserController_uploadAvatar: {
     responses: {
       201: {
         content: never;
+      };
+    };
+  };
+  TutorProfileController_tutorProfiles: {
+    parameters: {
+      query: {
+        searchString: string;
+        stringCursor?: string;
+        take: number;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["Paginated"] & {
+            nodes?: components["schemas"]["TutorProfileEntity"][];
+          };
+        };
+      };
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      500: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
       };
     };
   };
@@ -513,34 +577,6 @@ export interface operations {
     responses: {
       200: {
         content: never;
-      };
-      401: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      500: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  TutorProfileController_tutorProfiles: {
-    parameters: {
-      query: {
-        searchString: string;
-        stringCursor?: string;
-        take: number;
-      };
-    };
-    responses: {
-      200: {
-        content: {
-          "application/json": components["schemas"]["Paginated"] & {
-            nodes?: components["schemas"]["TutorProfileEntity"][];
-          };
-        };
       };
       401: {
         content: {
@@ -982,10 +1018,77 @@ export interface operations {
       };
     };
   };
+  JobController_updateJob: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateJobInput"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["JobEntity"];
+        };
+      };
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      500: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
   JobController_createJob: {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateJobInput"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["JobEntity"];
+        };
+      };
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      500: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  JobController_findJobById: {
+    parameters: {
+      path: {
+        jobId: string;
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["JobEntity"];
+        };
+      };
+      500: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  JobController_deleteJob: {
+    parameters: {
+      path: {
+        jobId: string;
       };
     };
     responses: {
@@ -1014,7 +1117,6 @@ export interface operations {
         searchString: string;
         minFee: number;
         maxFee: number;
-        jobType?: components["schemas"]["JobType"];
         jobMethod?: components["schemas"]["JobMethod"];
         sortBy: components["schemas"]["SortBy"];
       };
@@ -1057,25 +1159,6 @@ export interface operations {
       401: {
         content: {
           "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      500: {
-        content: {
-          "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-    };
-  };
-  JobController_findJobById: {
-    parameters: {
-      path: {
-        jobId: string;
-      };
-    };
-    responses: {
-      200: {
-        content: {
-          "application/json": components["schemas"]["JobEntity"];
         };
       };
       500: {

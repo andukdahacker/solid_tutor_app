@@ -11,7 +11,7 @@ const AppLayout = (props: ParentProps) => {
       <div class="drawer-content flex flex-row items-start justify-center">
         <div class="w-full">
           <NavBar />
-          <div class="z-0">{props.children}</div>
+          {props.children}
         </div>
       </div>
       <div class="drawer-side z-10">

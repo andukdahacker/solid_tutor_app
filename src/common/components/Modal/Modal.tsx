@@ -36,14 +36,15 @@ const Modal = (props: ParentProps<ModalProps>) => {
     <Portal>
       <Show when={props.isOpen}>
         <div
-          class="fixed inset-0 z-50 h-full w-full bg-black/70"
+          class="fixed z-50 bg-black/70"
+          style={{ inset: "0 0 0 0" }}
           onClick={() => {
             props.onClose();
           }}
         >
           <div
-            class="fixed left-1/2 top-1/2 min-w-80 overflow-auto rounded-lg bg-base-100 p-6"
-            style={{ transform: "translate(-50%, -50%)" }}
+            class="fixed left-1/2 top-1/2 max-h-svh min-w-80 max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-scroll rounded-lg bg-base-100 p-6"
+            role="dialog"
             onClick={(e) => {
               e.stopImmediatePropagation();
             }}

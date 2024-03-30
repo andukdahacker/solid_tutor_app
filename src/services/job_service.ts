@@ -7,6 +7,7 @@ import {
   DisconnectJobConnectionInput,
   FindJobConnectionsInput,
   GetAcceptedJobConnectionInput,
+  UpdateJobInput,
 } from "../schema/inputs";
 import { AcceptJobConnectionResponse } from "../schema/responses";
 import client from "./client";
@@ -30,6 +31,58 @@ class JobService {
       };
     } catch (error) {
       console.log(error);
+      return {
+        ok: false,
+        error: new Error(),
+      };
+    }
+  }
+
+  static async updateJob(input: UpdateJobInput): Promise<Result<Job>> {
+    try {
+      const response = await client.PUT("/job", { body: input });
+
+      if (response.error) {
+        return {
+          ok: false,
+          error: new Error(response.error.message),
+        };
+      }
+
+      return {
+        ok: true,
+        value: response.data,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: new Error(),
+      };
+    }
+  }
+
+  static async deleteJob(jobId: string): Promise<Result<Job>> {
+    try {
+      const response = await client.DELETE("/job/{jobId}", {
+        params: {
+          path: {
+            jobId,
+          },
+        },
+      });
+
+      if (response.error) {
+        return {
+          ok: false,
+          error: new Error(response.error.message),
+        };
+      }
+
+      return {
+        ok: true,
+        value: response.data,
+      };
+    } catch (error) {
       return {
         ok: false,
         error: new Error(),

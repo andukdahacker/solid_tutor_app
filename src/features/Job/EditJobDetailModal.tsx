@@ -1,57 +1,69 @@
-import { Show, createSignal } from "solid-js";
+import {
+  Accessor,
+  Setter,
+  Show,
+  batch,
+  createEffect,
+  createSignal,
+} from "solid-js";
 import Modal from "../../common/components/Modal/Modal";
-import SelectSubjectField from "./SelectSubjectField";
-import createForm from "../../common/hooks/createForm";
-import { CreateJobInput } from "../../schema/inputs";
-import { Subject } from "../../schema/entities";
 import { FiX } from "solid-icons/fi";
-import { createMutable } from "solid-js/store";
-import createMutation from "../../common/hooks/createMutation";
-import JobService from "../../services/job_service";
 import toast from "solid-toast";
-import { useNavigate } from "@solidjs/router";
+import Loading from "../../common/components/LoadingIndicator/Loading";
+import createForm from "../../common/hooks/createForm";
+import createMutation from "../../common/hooks/createMutation";
+import { Job, Subject } from "../../schema/entities";
+import { CreateJobInput, UpdateJobInput } from "../../schema/inputs";
+import JobService from "../../services/job_service";
+import SelectSubjectField from "./SelectSubjectField";
+import { createStore } from "solid-js/store";
 
-const CreateJobButton = () => {
-  const [isOpen, setIsOpen] = createSignal(false);
+interface EditJobDetailModalProps {
+  job: Accessor<Job | undefined>;
+  onEditSuccess: (updatedJob: Job) => void;
+  isOpen: Accessor<boolean>;
+  setIsOpen: Setter<boolean>;
+}
+
+const EditJobDetailButton = (props: EditJobDetailModalProps) => {
   const [selectedSubject, setSelectedSubject] = createSignal<Subject | null>(
-    null,
+    props.job()?.subject ?? null,
   );
 
-  const { register, handleSubmit } = createForm<
+  const [initialInput, setInitialInput] = createStore<
     Omit<CreateJobInput, "subjectId">
   >({
-    title: "",
-    description: "",
-    fee: 0,
-    jobMethod: "BOTH",
-    numberOfSessions: 1,
+    title: props.job()?.title ?? "",
+    description: props.job()?.description ?? "",
+    fee: props.job()?.fee ?? 0,
+    jobMethod: props.job()?.jobMethod ?? "BOTH",
+    numberOfSessions: props.job()?.numberOfSessions ?? 1,
   });
 
-  const navigate = useNavigate();
+  const { register, handleSubmit } =
+    createForm<Omit<CreateJobInput, "subjectId">>(initialInput);
 
   const { mutate, isLoading } = createMutation({
-    mutate: async (input: CreateJobInput) => await JobService.createJob(input),
+    mutate: async (input: UpdateJobInput) => await JobService.updateJob(input),
     onSuccess: (result) => {
-      toast.success("Created job successfully");
-      setIsOpen(false);
-      navigate("/job/" + result.id);
+      toast.success("Updated job successfully");
+      props.onEditSuccess(result);
+      setInitialInput(result);
+      props.setIsOpen(false);
       return result;
     },
     onError: (error) => {
-      toast.error("Failed to create job");
+      toast.error("Failed to update job");
       return error;
     },
   });
 
   return (
     <>
-      <button class="btn btn-primary" onClick={() => setIsOpen(true)}>
-        Create job
-      </button>
       <Modal
-        isOpen={isOpen()}
-        onClose={() => setIsOpen(false)}
-        title="Create job"
+        isOpen={props.isOpen()}
+        onClose={() => props.setIsOpen(false)}
+        title="Edit job"
       >
         <form
           class="w-80"
@@ -61,8 +73,8 @@ const CreateJobButton = () => {
             await handleSubmit(async (values) => {
               mutate({
                 ...values,
-                subjectId: selectedSubject()?.id ?? "",
-                numberOfSessions: 1,
+                subjectId: selectedSubject()?.id,
+                id: props.job()?.id ?? "",
               });
             });
           }}
@@ -139,7 +151,10 @@ const CreateJobButton = () => {
           </div>
 
           <div class="mt-10 flex w-full flex-row items-center justify-center gap-4">
-            <button class="btn btn-outline" onClick={() => setIsOpen(false)}>
+            <button
+              class="btn btn-outline"
+              onClick={() => props.setIsOpen(false)}
+            >
               Cancel
             </button>
             <button
@@ -147,7 +162,7 @@ const CreateJobButton = () => {
               class="btn btn-primary"
               disabled={isLoading()}
             >
-              {isLoading() ? "Creating..." : "Create"}
+              {isLoading() ? <Loading size="sm" /> : "Edit"}
             </button>
           </div>
         </form>
@@ -156,4 +171,4 @@ const CreateJobButton = () => {
   );
 };
 
-export default CreateJobButton;
+export default EditJobDetailButton;

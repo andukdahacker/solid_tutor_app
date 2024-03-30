@@ -5,6 +5,9 @@ import { Job } from "../../schema/entities";
 import { useAuth } from "../../providers/AuthProvider";
 import JobActionButton from "../Job/JobActionButton";
 import { useExploreJob } from "./context/ExploreJobContext";
+import { Switch, Match } from "solid-js";
+import ApplyButton from "../Job/ApplyButton";
+import RequestedButton from "../Job/RequestedButton";
 
 interface JobCardProps {
   job: Job;
@@ -17,6 +20,11 @@ const JobCard = (props: JobCardProps) => {
     props.job.createdAt == props.job.updatedAt
       ? `Posted ${DatetimeUtils.ago(props.job.createdAt)} ago`
       : `Updated ${DatetimeUtils.ago(props.job.updatedAt)} ago`;
+
+  const jobConnection = () =>
+    props.job.jobConnections.length > 0
+      ? props.job.jobConnections[0]
+      : undefined;
   return (
     <div class="bg-base card w-80 shadow-xl">
       <div class="card-body">
@@ -52,15 +60,32 @@ const JobCard = (props: JobCardProps) => {
           <A href={`/job/${props.job.id}`} class="btn btn-outline btn-sm w-24">
             See more
           </A>
-          <JobActionButton
-            job={props.job}
-            onApplySuccess={(result) =>
-              handleOnJobApplySuccess(props.job.id, result)
-            }
-            onUndoSuccess={() => handleOnJobUndoApplySuccess(props.job.id)}
-            applyBtnClass="btn btn-primary btn-sm w-24"
-            requestedBtnClass="btn btn-primary btn-sm w-24"
-          />
+          <Switch>
+            <Match when={jobConnection()?.status == undefined}>
+              <ApplyButton
+                onApplySuccess={(result) => {
+                  handleOnJobApplySuccess(props.job.id, result);
+                }}
+                job={props.job}
+                buttonClass={"btn btn-primary w-24 btn-sm"}
+              />
+            </Match>
+            <Match when={jobConnection()?.status == "REQUESTED"}>
+              <RequestedButton
+                job={props.job}
+                requestedButtonClass={"btn btn-primary w-24 btn-sm"}
+                onUndoSuccess={() => {
+                  handleOnJobUndoApplySuccess(props.job.id);
+                }}
+              />
+            </Match>
+            <Match when={jobConnection()?.status == "ACCEPTED"}>
+              <button class="btn btn-primary">Accepted</button>
+            </Match>
+            <Match when={jobConnection()?.status == "DECLINED"}>
+              <button class="btn btn-primary">Declined</button>
+            </Match>
+          </Switch>
         </div>
       </div>
     </div>

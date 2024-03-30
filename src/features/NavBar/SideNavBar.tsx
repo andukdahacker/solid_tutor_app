@@ -4,6 +4,7 @@ import Avatar from "../../common/components/Avatar/Avatar";
 import { RoutesPath } from "../../common/constants";
 import { useAuth } from "../../providers/AuthProvider";
 import SettingButton from "./SettingButton";
+import Logo from "../../common/components/Logo/Logo";
 
 const SideNavBar = () => {
   const { auth } = useAuth();
@@ -19,9 +20,12 @@ const SideNavBar = () => {
       </Show>
       <Show when={auth.authenticated}>
         <div class="w-54 menu z-20 min-h-full bg-base-200 p-4 text-base-content">
-          <h1 class="mb-10 text-center text-lg font-bold text-primary sm:text-xl md:text-2xl lg:text-3xl">
-            StudyBean
-          </h1>
+          <div class="mb-10 flex flex-row items-center justify-start gap-2">
+            <Logo />
+            <span class="text-center text-lg font-bold text-primary sm:text-xl md:text-2xl lg:text-3xl">
+              studybean
+            </span>
+          </div>
 
           <div class="flex flex-col gap-10">
             <A
@@ -53,7 +57,7 @@ const SideNavBar = () => {
           <div class="grow"></div>
           <div class="flex flex-row items-center justify-between">
             <A
-              href={"/profile"}
+              href={"/profile/" + auth.user?.id}
               class="flex-3 btn btn-ghost flex flex-row items-center justify-center p-2"
             >
               <Avatar

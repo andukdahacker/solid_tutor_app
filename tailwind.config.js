@@ -10,16 +10,6 @@ module.exports = {
   },
   plugins: [require("@tailwindcss/typography"), require("daisyui")],
   daisyui: {
-    themes: [
-      "synthwave",
-      "fantasy",
-      "coffee",
-      "night",
-      "dim",
-      "lemonade",
-      "lofi",
-      "luxury",
-      "dracula",
-    ],
+    themes: ["nord", "night"],
   },
 };
