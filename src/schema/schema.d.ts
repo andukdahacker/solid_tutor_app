@@ -28,6 +28,15 @@ export interface paths {
     post: operations["TutorProfileController_createTutorProfile"];
     delete: operations["TutorProfileController_deleteTutorProfileSubject"];
   };
+  "/tutor-profile/add-subject": {
+    post: operations["TutorProfileController_addTutorProfileSubject"];
+  };
+  "/tutor-profile/remove-subject": {
+    delete: operations["TutorProfileController_removeTutorProfileSubject"];
+  };
+  "/tutor-profile/update-subject": {
+    put: operations["TutorProfileController_updateTutorProfileSubject"];
+  };
   "/learner-profile/{userId}": {
     get: operations["LearnerProfileController_getLearnerProfile"];
   };
@@ -141,9 +150,10 @@ export interface components {
     };
     TutorProfileSubjectEntity: {
       tutorId: string;
-      tutorProfile?: components["schemas"]["TutorProfileEntity"] | null;
+      tutor?: components["schemas"]["TutorProfileEntity"] | null;
       subjectId: string;
       subject?: components["schemas"]["SubjectEntity"] | null;
+      description?: string | null;
     };
     /** @enum {string} */
     JobMethod: "ONLINE" | "OFFLINE" | "BOTH";
@@ -248,7 +258,6 @@ export interface components {
     CreateTutorProfileInput: Record<string, never>;
     UpdateTutorProfileInput: {
       bio?: string;
-      subjectIds?: string[];
       /** Format: int64 */
       tutorFee?: number;
       jobMethod?: components["schemas"]["JobMethod"];
@@ -256,6 +265,11 @@ export interface components {
     DeleteTutorProfileSubjectInput: {
       subjectId: string;
       tutorProfileId: string;
+    };
+    CreateTutorProfileSubjectInput: {
+      subjectId: string;
+      tutorProfileId: string;
+      description?: string;
     };
     CreateLearnerProfileInput: {
       bio: string;
@@ -391,6 +405,7 @@ export interface components {
       educationEntity: string;
       educationEntityUrl?: string;
       fromDate: string;
+      isCurrent: boolean;
       toDate?: string | null;
       description?: string;
     };
@@ -576,7 +591,81 @@ export interface operations {
     };
     responses: {
       200: {
-        content: never;
+        content: {
+          "application/json": components["schemas"]["TutorProfileSubjectEntity"];
+        };
+      };
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      500: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  TutorProfileController_addTutorProfileSubject: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTutorProfileSubjectInput"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["TutorProfileSubjectEntity"];
+        };
+      };
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      500: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  TutorProfileController_removeTutorProfileSubject: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeleteTutorProfileSubjectInput"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["TutorProfileSubjectEntity"];
+        };
+      };
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+      500: {
+        content: {
+          "application/json": components["schemas"]["ErrorResponse"];
+        };
+      };
+    };
+  };
+  TutorProfileController_updateTutorProfileSubject: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTutorProfileSubjectInput"];
+      };
+    };
+    responses: {
+      200: {
+        content: {
+          "application/json": components["schemas"]["TutorProfileSubjectEntity"];
+        };
       };
       401: {
         content: {

@@ -13,6 +13,10 @@ class DatetimeUtils {
   static fromSeconds(seconds: number) {
     return new Date(seconds * 1000);
   }
+
+  static formatYYYYMMDD(date: Date) {
+    return dayjs(date).format("YYYY-MM-DD");
+  }
 }
 
 export default DatetimeUtils;

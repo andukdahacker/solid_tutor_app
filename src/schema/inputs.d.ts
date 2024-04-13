@@ -60,3 +60,9 @@ export type DisconnectJobConnectionInput =
   components["schemas"]["DisconnectJobConnectionInput"];
 export type UpdateJobInput =
   operations["JobController_updateJob"]["requestBody"]["content"]["application/json"];
+
+export type CreateTutorProfileSubjectInput =
+  operations["TutorProfileController_addTutorProfileSubject"]["requestBody"]["content"]["application/json"];
+
+export type UpdateTutorProfileSubjectInput =
+  operations["TutorProfileController_updateTutorProfileSubject"]["requestBody"]["content"]["application/json"];

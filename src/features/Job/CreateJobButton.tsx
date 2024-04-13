@@ -71,7 +71,7 @@ const CreateJobButton = () => {
             <label>
               <span class="label-text mr-4">Subject</span>
               <Show when={selectedSubject()}>
-                <div class="badge badge-primary badge-outline">
+                <div class="badge badge-primary badge-outline badge-lg">
                   {selectedSubject()?.name}
                   <div
                     class="ml-2 cursor-pointer"

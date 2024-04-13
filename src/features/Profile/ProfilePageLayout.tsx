@@ -18,7 +18,7 @@ const ProfilePageLayout = () => {
         </div>
       </Match>
       <Match when={data()}>
-        <div class="flex w-full flex-row items-start justify-start gap-6">
+        <div class="flex w-full flex-col items-center gap-6 md:flex-row md:items-start md:justify-start">
           <ProfileSummaryCard user={data()!} />
           <ProfileDetails user={data()!} />
         </div>

@@ -1,17 +1,18 @@
-import { Show, createEffect } from "solid-js";
-import createForm from "../../common/hooks/createForm";
-import { Education, User } from "../../schema/entities";
-import { CreateEducationInput, CreateJobInput } from "../../schema/inputs";
-import createMutation from "../../common/hooks/createMutation";
-import ProfileService from "../../services/profile_service";
+import { Show } from "solid-js";
 import toast from "solid-toast";
+import createForm from "../../common/hooks/createForm";
+import createMutation from "../../common/hooks/createMutation";
+import { User } from "../../schema/entities";
+import { CreateEducationInput } from "../../schema/inputs";
+import ProfileService from "../../services/profile_service";
+import { useProfileContext } from "./context/ProfileContextProvider";
 
 interface EducationCreateFormProps {
-  user: User;
-  onCreateSuccess: (education: Education) => void;
+  onClose: () => void;
 }
 
 const EducationCreateForm = (props: EducationCreateFormProps) => {
+  const { addEducation } = useProfileContext();
   const { register, handleSubmit, watch, setField } =
     createForm<CreateEducationInput>({
       educationEntity: "",
@@ -29,8 +30,8 @@ const EducationCreateForm = (props: EducationCreateFormProps) => {
     mutate: async (input: CreateEducationInput) =>
       await ProfileService.createEducation(input),
     onSuccess: (result) => {
+      addEducation(result);
       toast.success("Created education successfully");
-      props.onCreateSuccess(result);
     },
     onError: (error) => {
       toast.error("Failed to create education" + error.message);
@@ -42,11 +43,11 @@ const EducationCreateForm = (props: EducationCreateFormProps) => {
       onSubmit={async (e) => {
         e.preventDefault();
         await handleSubmit(async (values) => {
-          console.log(values);
-          //   if (watchIsCurrent()) {
-          //     setField("toDate", "");
-          //   }
-          //   await mutate(values);
+          if (watchIsCurrent()) {
+            setField("toDate", "");
+          }
+          await mutate(values);
+          props.onClose();
         });
       }}
     >

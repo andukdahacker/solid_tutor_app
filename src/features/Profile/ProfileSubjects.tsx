@@ -1,27 +1,26 @@
 import { For, Show, createSignal } from "solid-js";
-import { User } from "../../schema/entities";
-import { FiBookOpen } from "solid-icons/fi";
-import DatetimeUtils from "../../common/utils/datetime_utils";
 import Modal from "../../common/components/Modal/Modal";
-import EducationCreateForm from "./EducationCreateForm";
-import EducationCard from "./EducationCard";
+import { User } from "../../schema/entities";
+import SubjectCard from "./SubjectCard";
+import SubjectCreateForm from "./SubjectCreateForm";
 import { useAuth } from "../../providers/AuthProvider";
 
-interface ProfileEducationProps {
+interface ProfileSubjectsProps {
   user: User;
 }
 
-const ProfileEducation = (props: ProfileEducationProps) => {
-  const education = () => props.user.education ?? [];
+const ProfileSubjects = (props: ProfileSubjectsProps) => {
+  const subjects = () => props.user.tutorProfile.tutorProfileSubject;
   const [isCreateFormOpen, setIsCreateFormOpen] = createSignal(false);
 
   const { auth } = useAuth();
 
   const isOwner = () => auth.user?.id == props.user.id;
-
   return (
     <>
-      <For each={education()}>{(val) => <EducationCard education={val} />}</For>
+      <For each={subjects()}>
+        {(val) => <SubjectCard tutorProfileSubject={val} />}
+      </For>
       <Show when={isOwner()}>
         <div class="flex items-center justify-center">
           <button
@@ -30,15 +29,18 @@ const ProfileEducation = (props: ProfileEducationProps) => {
               setIsCreateFormOpen(true);
             }}
           >
-            Add Education
+            Add Subject
           </button>
 
           <Modal
             isOpen={isCreateFormOpen()}
             onClose={() => setIsCreateFormOpen(false)}
-            title="Add Education"
+            title="Add Subject"
           >
-            <EducationCreateForm onClose={() => setIsCreateFormOpen(false)} />
+            <SubjectCreateForm
+              user={props.user}
+              onClose={() => setIsCreateFormOpen(false)}
+            />
           </Modal>
         </div>
       </Show>
@@ -46,4 +48,4 @@ const ProfileEducation = (props: ProfileEducationProps) => {
   );
 };
 
-export default ProfileEducation;
+export default ProfileSubjects;

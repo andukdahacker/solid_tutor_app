@@ -43,14 +43,13 @@ const Modal = (props: ParentProps<ModalProps>) => {
           }}
         >
           <div
-            class="fixed left-1/2 top-1/2 max-h-svh min-w-80 max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-scroll rounded-lg bg-base-100 p-6"
+            class="fixed left-1/2 top-1/2 max-h-svh min-w-80 max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg bg-base-100 p-6"
             role="dialog"
             onClick={(e) => {
               e.stopImmediatePropagation();
             }}
           >
-            <div class="flex flex-row items-center justify-center">
-              <div class="grow"></div>
+            <div class="flex flex-row items-center">
               <span class="text-lg font-semibold">{props.title}</span>
               <div class="grow"></div>
               <FiX

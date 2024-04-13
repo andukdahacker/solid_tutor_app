@@ -1,5 +1,6 @@
 import { ReactiveMap } from "@solid-primitives/map";
 import { Accessor, batch, createEffect, createSignal } from "solid-js";
+import DatetimeUtils from "../utils/datetime_utils";
 
 type FieldState = {
   ref: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -21,6 +22,12 @@ function createForm<T extends Record<string, any>>(initialValues: T) {
     const isInputElement = el instanceof HTMLInputElement;
     if (isInputElement && el.type == "checkbox") {
       el.checked = initialValues[field];
+    } else if (el.type == "date") {
+      if (initialValues[field] == "") {
+        el.value = "";
+      } else {
+        el.value = DatetimeUtils.formatYYYYMMDD(new Date(initialValues[field]));
+      }
     } else {
       el.value = initialValues[field];
     }

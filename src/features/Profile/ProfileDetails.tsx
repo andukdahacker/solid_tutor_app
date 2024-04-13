@@ -1,5 +1,7 @@
 import { User } from "../../schema/entities";
 import ProfileEducation from "./ProfileEducation";
+import ProfileSubjects from "./ProfileSubjects";
+import ProfileWorkExperience from "./ProfileWorkExperience";
 
 interface ProfileDetailsProps {
   user: User;
@@ -7,7 +9,7 @@ interface ProfileDetailsProps {
 
 const ProfileDetails = (props: ProfileDetailsProps) => {
   return (
-    <div class="mr-4 mt-4 w-full">
+    <div class="w-full md:mr-4 md:mt-4">
       <div role="tablist" class="tabs tabs-lifted">
         <input
           type="radio"
@@ -35,7 +37,7 @@ const ProfileDetails = (props: ProfileDetailsProps) => {
           role="tabpanel"
           class="tab-content rounded-box border-base-300 bg-base-100 p-6"
         >
-          Tab content 2
+          <ProfileWorkExperience user={props.user} />
         </div>
 
         <input
@@ -49,7 +51,7 @@ const ProfileDetails = (props: ProfileDetailsProps) => {
           role="tabpanel"
           class="tab-content rounded-box border-base-300 bg-base-100 p-6"
         >
-          Tab content 3
+          <ProfileSubjects user={props.user} />
         </div>
 
         <input
