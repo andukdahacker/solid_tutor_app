@@ -2,8 +2,6 @@ import { ParentProps, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import Loading from "./common/components/LoadingIndicator/Loading";
 import AppLayout from "./features/Layout/AppLayout";
-import NavBar from "./features/NavBar/NavBar";
-import SideNavBar from "./features/NavBar/SideNavBar";
 import { AuthProvider } from "./providers/AuthProvider";
 import { LocaleProvider } from "./providers/LocaleProvider";
 

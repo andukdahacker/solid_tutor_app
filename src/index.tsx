@@ -11,6 +11,8 @@ import LearnerDashboard from "./pages/LearnerDashboard";
 import ProfilePage from "./pages/ProfilePage";
 import TutorDashboard from "./pages/TutorDashboard";
 import JobDetailPage from "./pages/JobDetailPage";
+import CreateJobButton from "./features/Job/CreateJobButton";
+import CreateJobPage from "./pages/CreateJobPage";
 
 const root = document.getElementById("root");
 
@@ -32,6 +34,7 @@ render(
       <Route path={RoutesPath.tutorDashboardPage} component={TutorDashboard} />
       <Route path={RoutesPath.profilePage} component={ProfilePage} />
       <Route path={RoutesPath.jobDetail} component={JobDetailPage} />
+      <Route path={RoutesPath.createJob} component={CreateJobPage} />
     </Router>
   ),
   root!,

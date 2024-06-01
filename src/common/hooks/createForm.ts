@@ -1,5 +1,5 @@
 import { ReactiveMap } from "@solid-primitives/map";
-import { Accessor, batch, createEffect, createSignal } from "solid-js";
+import { batch, createEffect, createSignal } from "solid-js";
 import DatetimeUtils from "../utils/datetime_utils";
 
 type FieldState = {

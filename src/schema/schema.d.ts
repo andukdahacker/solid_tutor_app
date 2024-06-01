@@ -217,6 +217,15 @@ export interface components {
       type: components["schemas"]["JobConnectionType"];
       createdAt: number;
     };
+    JobScheduleEntity: {
+      id: string;
+      jobId: string;
+      /** Format: date-time */
+      startTime: string;
+      /** Format: date-time */
+      endTime: string;
+      selected: boolean;
+    };
     JobEntity: {
       id: string;
       learner: components["schemas"]["LearnerProfileEntity"];
@@ -233,6 +242,7 @@ export interface components {
       jobMethod: components["schemas"]["JobMethod"];
       jobStatus: components["schemas"]["JobStatus"];
       jobConnections: components["schemas"]["JobConnectionEntity"][];
+      schedule?: components["schemas"]["JobScheduleEntity"][];
     };
     LearnerProfileEntity: {
       id: string;
@@ -345,6 +355,12 @@ export interface components {
     GetManyNotificationsInput: Record<string, never>;
     CreateChatInput: Record<string, never>;
     GetChatsInput: Record<string, never>;
+    CreateJobScheduleInput: {
+      /** Format: date-time */
+      startTime: string;
+      /** Format: date-time */
+      endTime: string;
+    };
     CreateJobInput: {
       subjectId: string;
       description: string;
@@ -353,6 +369,7 @@ export interface components {
       title: string;
       numberOfSessions: number;
       jobMethod: components["schemas"]["JobMethod"];
+      schedules: components["schemas"]["CreateJobScheduleInput"][];
     };
     UpdateJobInput: {
       id: string;

@@ -1,15 +1,16 @@
-import { Show, createSignal } from "solid-js";
-import Modal from "../../common/components/Modal/Modal";
-import SelectSubjectField from "./SelectSubjectField";
-import createForm from "../../common/hooks/createForm";
-import { CreateJobInput } from "../../schema/inputs";
-import { Subject } from "../../schema/entities";
-import { FiX } from "solid-icons/fi";
-import { createMutable } from "solid-js/store";
-import createMutation from "../../common/hooks/createMutation";
-import JobService from "../../services/job_service";
-import toast from "solid-toast";
 import { useNavigate } from "@solidjs/router";
+import { FiDelete, FiX } from "solid-icons/fi";
+import { For, Show, createSignal } from "solid-js";
+import toast from "solid-toast";
+import Modal from "../../common/components/Modal/Modal";
+import createForm from "../../common/hooks/createForm";
+import createMutation from "../../common/hooks/createMutation";
+import { Subject } from "../../schema/entities";
+import { CreateJobInput } from "../../schema/inputs";
+import JobService from "../../services/job_service";
+import SelectSubjectField from "./SelectSubjectField";
+import dayjs from "dayjs";
+import DatetimeUtils from "../../common/utils/datetime_utils";
 
 const CreateJobButton = () => {
   const [isOpen, setIsOpen] = createSignal(false);
@@ -17,8 +18,16 @@ const CreateJobButton = () => {
     null,
   );
 
+  const [schedules, setSchedules] = createSignal<
+    {
+      date: Date;
+      startTime: string;
+      endTime: string;
+    }[]
+  >([]);
+
   const { register, handleSubmit } = createForm<
-    Omit<CreateJobInput, "subjectId">
+    Omit<CreateJobInput, "subjectId" | "schedules">
   >({
     title: "",
     description: "",
@@ -63,6 +72,21 @@ const CreateJobButton = () => {
                 ...values,
                 subjectId: selectedSubject()?.id ?? "",
                 numberOfSessions: 1,
+                schedules: schedules().map((e) => {
+                  const { startDate, endDate } =
+                    DatetimeUtils.contructStartEndDate(
+                      e.date,
+                      e.startTime,
+                      e.endTime,
+                    );
+
+                  console.log(startDate, endDate);
+
+                  return {
+                    startTime: startDate.toISOString(),
+                    endTime: endDate.toISOString(),
+                  };
+                }),
               });
             });
           }}
@@ -136,6 +160,119 @@ const CreateJobButton = () => {
               class="textarea textarea-bordered"
               ref={(el) => register(el, "description")}
             />
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Schedules</span>
+            </label>
+
+            <button
+              class="btn btn-outline"
+              type="button"
+              onClick={() => {
+                const newSchedule = {
+                  date: new Date(),
+                  startTime: "",
+                  endTime: "",
+                };
+                setSchedules([...schedules(), newSchedule]);
+              }}
+            >
+              Add Schedule
+            </button>
+
+            <For each={schedules()}>
+              {(schedule, index) => (
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Schedule {index() + 1}</span>
+                  </label>
+                  <div class="flex flex-row items-center justify-center gap-10">
+                    <div class="flex flex-row items-center justify-center gap-4">
+                      <div class="form-control">
+                        <label class="label">
+                          <span class="label-text">Date</span>
+                        </label>
+                        <input
+                          type="date"
+                          class="input input-sm input-bordered"
+                          value={dayjs(schedules()[index()].date).format(
+                            "YYYY-MM-DD",
+                          )}
+                          onChange={(e) =>
+                            setSchedules(
+                              schedules().map((s, i) =>
+                                i === index()
+                                  ? {
+                                      ...s,
+                                      date: new Date(e.currentTarget.value),
+                                    }
+                                  : s,
+                              ),
+                            )
+                          }
+                        />
+                        <label class="label">
+                          <span class="label-text">Start time</span>
+                        </label>
+
+                        <input
+                          type="time"
+                          class="input input-sm input-bordered max-w-xs"
+                          value={schedule.startTime}
+                          onChange={(e) =>
+                            setSchedules(
+                              schedules().map((s, i) =>
+                                i === index()
+                                  ? {
+                                      ...s,
+                                      startTime: e.currentTarget.value,
+                                    }
+                                  : s,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
+                      <div class="form-control">
+                        <label class="label">
+                          <span class="label-text">End time</span>
+                        </label>
+                        <input
+                          type="time"
+                          class="input input-sm input-bordered max-w-xs"
+                          value={schedule.endTime}
+                          onChange={(e) =>
+                            setSchedules(
+                              schedules().map((s, i) =>
+                                i === index()
+                                  ? {
+                                      ...s,
+                                      endTime: e.currentTarget.value,
+                                    }
+                                  : s,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                    <button
+                      class="btn btn-error btn-sm"
+                      type="button"
+                      onClick={() => {
+                        setSchedules(
+                          schedules().filter((s, i) => i !== index()),
+                        );
+                      }}
+                    >
+                      <FiDelete />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </For>
           </div>
 
           <div class="mt-10 flex w-full flex-row items-center justify-center gap-4">

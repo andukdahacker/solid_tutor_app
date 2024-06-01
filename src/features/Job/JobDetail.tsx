@@ -1,17 +1,14 @@
-import { Match, Show, Switch } from "solid-js";
-import { useJobDetail } from "./context/JobDetailContext";
+import { For, Match, Show, Switch } from "solid-js";
+import Avatar from "../../common/components/Avatar/Avatar";
 import Loading from "../../common/components/LoadingIndicator/Loading";
 import CurrencyUtils from "../../common/utils/currency_utils";
-import Avatar from "../../common/components/Avatar/Avatar";
-import ApplyButton from "./ApplyButton";
 import { useAuth } from "../../providers/AuthProvider";
-import { produce, unwrap } from "solid-js/store";
-import { JobConnection } from "../../schema/entities";
-import JobActionButton from "./JobActionButton";
-import { useParams } from "@solidjs/router";
-import RequestedButton from "./RequestedButton";
-import EditJobDetailButton from "./EditJobDetailButton";
+import ApplyButton from "./ApplyButton";
 import DeleteJobDetailButton from "./DeleteJobDetailButton";
+import EditJobDetailButton from "./EditJobDetailButton";
+import RequestedButton from "./RequestedButton";
+import { useJobDetail } from "./context/JobDetailContext";
+import dayjs from "dayjs";
 
 const JobDetail = () => {
   const {
@@ -71,6 +68,17 @@ const JobDetail = () => {
               </div>
               <div class="flex flex-col">
                 <span class="text-lg font-semibold">Availability</span>
+
+                <div class="flex flex-wrap">
+                  <For each={data()?.schedule}>
+                    {(schedule) => (
+                      <div class="badge badge-outline">
+                        {dayjs(schedule.startTime).format("YYYY-MM-DD, HH:mm")}{" "}
+                        - {dayjs(schedule.endTime).format("HH:mm")}
+                      </div>
+                    )}
+                  </For>
+                </div>
               </div>
             </div>
           </div>

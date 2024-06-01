@@ -1,9 +1,8 @@
 import {
   Accessor,
+  For,
   Setter,
   Show,
-  batch,
-  createEffect,
   createSignal,
 } from "solid-js";
 import Modal from "../../common/components/Modal/Modal";
@@ -17,6 +16,8 @@ import { CreateJobInput, UpdateJobInput } from "../../schema/inputs";
 import JobService from "../../services/job_service";
 import SelectSubjectField from "./SelectSubjectField";
 import { createStore } from "solid-js/store";
+import dayjs from "dayjs";
+import EditJobScheduleButton from "./EditJobScheduleButton";
 
 interface EditJobDetailModalProps {
   job: Accessor<Job | undefined>;
@@ -31,7 +32,7 @@ const EditJobDetailButton = (props: EditJobDetailModalProps) => {
   );
 
   const [initialInput, setInitialInput] = createStore<
-    Omit<CreateJobInput, "subjectId">
+    Omit<CreateJobInput, "subjectId" | "schedules">
   >({
     title: props.job()?.title ?? "",
     description: props.job()?.description ?? "",
@@ -41,7 +42,7 @@ const EditJobDetailButton = (props: EditJobDetailModalProps) => {
   });
 
   const { register, handleSubmit } =
-    createForm<Omit<CreateJobInput, "subjectId">>(initialInput);
+    createForm<Omit<CreateJobInput, "subjectId" | "schedules">>(initialInput);
 
   const { mutate, isLoading } = createMutation({
     mutate: async (input: UpdateJobInput) => await JobService.updateJob(input),
@@ -148,6 +149,25 @@ const EditJobDetailButton = (props: EditJobDetailModalProps) => {
               class="textarea textarea-bordered"
               ref={(el) => register(el, "description")}
             />
+          </div>
+
+          <div class="flex flex-col">
+            <label class="label">
+              <span class="label-text">Schedule</span>
+            </label>
+            <div class="flex flex-wrap">
+              <For each={props.job()?.schedule ?? []}>
+                {(schedule) => (
+                  <div class="badge badge-primary badge-outline badge-lg">
+                    <span>
+                      {dayjs(schedule.startTime).format("YYYY-MM-DD, HH:mm")} -{" "}
+                      {dayjs(schedule.endTime).format("HH:mm")}
+                    </span>
+                    <EditJobScheduleButton schedule={schedule} />
+                  </div>
+                )}
+              </For>
+            </div>
           </div>
 
           <div class="mt-10 flex w-full flex-row items-center justify-center gap-4">

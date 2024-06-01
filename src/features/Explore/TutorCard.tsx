@@ -2,12 +2,14 @@ import { For, Show } from "solid-js";
 import Avatar from "../../common/components/Avatar/Avatar";
 import CurrencyUtils from "../../common/utils/currency_utils";
 import { TutorProfile } from "../../schema/entities";
+import { useNavigate } from "@solidjs/router";
 
 interface TutorCardProps {
   tutor: TutorProfile;
 }
 
 const TutorCard = (props: TutorCardProps) => {
+  const navigate = useNavigate();
   return (
     <div class="bg-base card card-bordered w-80 shadow-md">
       <div class="card-body">
@@ -52,7 +54,14 @@ const TutorCard = (props: TutorCardProps) => {
           </div>
         </div>
         <div class="card-actions justify-end">
-          <button class="btn btn-primary">See profile</button>
+          <button
+            class="btn btn-primary"
+            onClick={() => {
+              navigate(`/profile/${props.tutor.user?.id}`);
+            }}
+          >
+            See profile
+          </button>
         </div>
       </div>
     </div>

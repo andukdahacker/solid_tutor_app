@@ -7,4 +7,5 @@ export const RoutesPath = {
   tutorDashboardPage: "/tutor-dashboard",
   profilePage: "/profile/:id",
   jobDetail: "/job/:id",
+  createJob: "/create-job",
 } as const;

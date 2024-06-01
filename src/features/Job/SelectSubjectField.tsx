@@ -11,6 +11,9 @@ import createQuery from "../../common/hooks/createQuery";
 import SubjectService from "../../services/subject_service";
 import Loading from "../../common/components/LoadingIndicator/Loading";
 import { Subject } from "../../schema/entities";
+import createMutation from "../../common/hooks/createMutation";
+import { CreateSubjectInput } from "../../schema/inputs";
+import toast from "solid-toast";
 
 interface ISelectSubjectFieldProps {
   onSelect: (subject: Subject) => void;
@@ -26,6 +29,19 @@ const SelectSubjectField = (props: ISelectSubjectFieldProps) => {
     queryFn: async (input) =>
       await SubjectService.findSubjects({ searchString: input!, take: 10 }),
     debounce: 500,
+  });
+
+  const { mutate, isLoading } = createMutation({
+    mutate: async (input: CreateSubjectInput) =>
+      await SubjectService.createSubject(input),
+    onSuccess: (data) => {
+      props.onSelect(data);
+      return data;
+    },
+    onError: (error) => {
+      toast.error("Failed to create new subject");
+      return error;
+    },
   });
 
   return (
@@ -49,6 +65,23 @@ const SelectSubjectField = (props: ISelectSubjectFieldProps) => {
           onMouseEnter={() => setMouseAtSuggestions(true)}
           onMouseLeave={() => setMouseAtSuggestions(false)}
         >
+          <Show when={data() && data()?.nodes?.length == 0}>
+            <div class="flex h-10 w-full cursor-pointer flex-row items-center bg-base-200 p-2">
+              <div>{input()}</div>
+              <div class="grow"></div>
+              <button
+                class="btn btn-outline btn-primary btn-sm"
+                onClick={async () => {
+                  await mutate({
+                    name: input(),
+                  });
+                }}
+                disabled={isLoading()}
+              >
+                {isLoading() ? "Creating..." : "Create new subject"}
+              </button>
+            </div>
+          </Show>
           <For each={data()?.nodes}>
             {(subject) => (
               <div

@@ -33,6 +33,9 @@ const SideNavBar = () => {
               class="text-md btn h-16"
               activeClass="btn-primary"
               inactiveClass="btn-outline"
+              onClick={() => {
+                document.getElementById("my-drawer-2")?.click();
+              }}
             >
               Explore
             </A>
@@ -41,6 +44,9 @@ const SideNavBar = () => {
               class="text-md btn h-16"
               activeClass="btn-primary"
               inactiveClass="btn-outline"
+              onClick={() => {
+                document.getElementById("my-drawer-2")?.click();
+              }}
             >
               Learner Dashboard
             </A>
@@ -49,6 +55,9 @@ const SideNavBar = () => {
               class="text-md btn h-16"
               activeClass="btn-primary"
               inactiveClass="btn-outline"
+              onClick={() => {
+                document.getElementById("my-drawer-2")?.click();
+              }}
             >
               Tutor Dashboard
             </A>
@@ -59,6 +68,9 @@ const SideNavBar = () => {
             <A
               href={"/profile/" + auth.user?.id}
               class="flex-3 btn btn-ghost flex flex-row items-center justify-center p-2"
+              onClick={() => {
+                document.getElementById("my-drawer-2")?.click();
+              }}
             >
               <Avatar
                 src={auth.user?.avatar}

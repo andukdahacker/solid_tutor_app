@@ -17,3 +17,4 @@ export type JobMethod = components["schemas"]["JobMethod"];
 export type Education = components["schemas"]["EducationEntity"];
 export type TutorProfileSubject =
   components["schemas"]["TutorProfileSubjectEntity"];
+export type JobSchedule = components["schemas"]["JobScheduleEntity"];

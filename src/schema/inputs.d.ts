@@ -66,3 +66,6 @@ export type CreateTutorProfileSubjectInput =
 
 export type UpdateTutorProfileSubjectInput =
   operations["TutorProfileController_updateTutorProfileSubject"]["requestBody"]["content"]["application/json"];
+
+export type CreateJobScheduleInput =
+  components["schemas"]["CreateJobScheduleInput"];

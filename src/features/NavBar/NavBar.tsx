@@ -9,6 +9,8 @@ import SignUpButton from "../Auth/SignUpButton";
 import LocaleController from "../Locale/LocaleController";
 import ThemeController from "../Theme/ThemeController";
 import CreateJobButton from "../Job/CreateJobButton";
+import { RoutesPath } from "../../common/constants";
+import { A } from "@solidjs/router";
 
 const NavBar = () => {
   const { t } = useLocale();
@@ -39,10 +41,16 @@ const NavBar = () => {
 
       <Show when={auth.authenticated}>
         <div class=" flex w-full flex-row items-center justify-between p-2">
-          <div>Search bar</div>
+          <div class="grow"></div>
           <div class="flex flex-row items-center justify-center gap-6">
             <FiMessageCircle class="h-6 w-6" />
             <FiBell class="h-6 w-6" />
+            <A
+              href={RoutesPath.createJob}
+              class="btn btn-primary"
+            >
+              Create Job
+            </A>
             <CreateJobButton />
           </div>
         </div>
