@@ -45,13 +45,9 @@ const NavBar = () => {
           <div class="flex flex-row items-center justify-center gap-6">
             <FiMessageCircle class="h-6 w-6" />
             <FiBell class="h-6 w-6" />
-            <A
-              href={RoutesPath.createJob}
-              class="btn btn-primary"
-            >
+            <A href={RoutesPath.createJob} class="btn btn-primary">
               Create Job
             </A>
-            <CreateJobButton />
           </div>
         </div>
       </Show>

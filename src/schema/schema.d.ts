@@ -1252,6 +1252,9 @@ export interface operations {
       query: {
         take: number;
         stringCursor?: string;
+        searchString?: string;
+        jobMethod?: components["schemas"]["JobMethod"];
+        jobStatus?: components["schemas"]["JobStatus"];
       };
     };
     responses: {

@@ -143,15 +143,8 @@ function createForm<T extends Record<string, any>>(initialValues: T) {
     const targetField = fieldMap().get(field);
 
     if (targetField) {
-      setFieldMapState((map) =>
-        map.set(field, {
-          ...targetField,
-          ref: {
-            ...targetField.ref,
-            value,
-          },
-        }),
-      );
+      targetField.ref.value = value;
+      console.log(targetField.ref.value);
     }
   };
 
@@ -201,6 +194,7 @@ function createForm<T extends Record<string, any>>(initialValues: T) {
     setField,
     resetFieldMap,
     watch,
+    setFieldMapState,
   };
 }
 

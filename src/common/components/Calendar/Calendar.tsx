@@ -2,10 +2,18 @@ import { CalendarProvider } from "./CalendarContext";
 import CalendarHeader from "./CalendarHeader";
 import CalendarView from "./CalendarView";
 
-const Calendar = () => {
+interface CalendarProps {
+  initialDate?: Date;
+  onSelectDate: (date: Date) => void;
+}
+
+const Calendar = (props: CalendarProps) => {
   return (
-    <CalendarProvider>
-      <div class="flex flex-col border p-6">
+    <CalendarProvider
+      initialDate={props.initialDate}
+      onSelectDate={props.onSelectDate}
+    >
+      <div class="flex h-full max-h-96 flex-col border p-6">
         <CalendarHeader />
         <CalendarView />
       </div>

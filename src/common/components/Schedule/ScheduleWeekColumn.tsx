@@ -1,26 +1,19 @@
 import dayjs from "dayjs";
-import { For, JSX, Show, createEffect, createSignal } from "solid-js";
+import { For, JSX, Show } from "solid-js";
 import ScheduleDayColumn from "./ScheduleDayColumn";
 import { useSchedule } from "./ScheduleProvider";
-import { c } from "vite/dist/node/types.d-AKzkD8vd";
-import Modal from "../Modal/Modal";
 
 const ScheduleWeekColumn = () => {
   const {
     currentTime,
-    firstSelectedDate,
-    lastSelectedDate,
-    firstSelectedIndex,
-    lastSelectedIndex,
-    setIsDragging,
-    isDragging,
-    setFirstSelectedDate,
-    setFirstSelectedIndex,
-    setLastSelectedDate,
-    setLastSelectedIndex,
-    setIsSelected,
     addSelectedTimeBlock,
     timeBlocks,
+    isDragging,
+    setIsDragging,
+    removeSelectedTimeBlock,
+    draggingTimeBlock,
+    setDraggingTimeBlock,
+    setDragged,
   } = useSchedule();
 
   const startOfWeek = () => currentTime().startOf("week");
@@ -42,100 +35,55 @@ const ScheduleWeekColumn = () => {
         return true;
       };
 
-      const isFirstAfterLast = () => {
-        if (firstSelectedDate() == null || lastSelectedDate() == null) {
-          return false;
+      const draggingTop = () => {
+        if (!draggingTimeBlock()) {
+          return "0px";
         }
-        return firstSelectedDate()?.isAfter(lastSelectedDate());
+
+        const topNum = draggingTimeBlock()!.firstIndex * 14;
+        return `${topNum}px`;
+      };
+
+      const draggingHeight = () => {
+        if (!draggingTimeBlock()) {
+          return "0px";
+        }
+
+        const heightNum =
+          (draggingTimeBlock()!.lastIndex -
+            draggingTimeBlock()!.firstIndex +
+            1) *
+          14;
+        return `${heightNum}px`;
+      };
+
+      const draggingText = () => {
+        if (!draggingTimeBlock()) {
+          return "";
+        }
+
+        return `${draggingTimeBlock()!.start.format("HH:mm")} - ${draggingTimeBlock()!.end.format("HH:mm")}`;
       };
 
       grid.push(
-        <div
-          class="relative border"
-          onDrop={(e) => {
-            e.preventDefault();
-            console.log("drop");
-          }}
-          onDragOver={(e) => {
-            e.preventDefault();
-            const containTimeSlot = e.target.classList.contains("timeslot");
-            if (containTimeSlot) {
-              const id = e.target.id;
-              const splitted = id.split("_");
-              const index = Number(splitted[0]);
-              const selectedDate = dayjs(splitted[1]);
-
-              console.log("dragover", selectedDate.format("HH:mm"));
-            }
-          }}
-          onMouseDown={(e) => {
-            const containTimeSlot = e.target.classList.contains("timeslot");
-
-            if (containTimeSlot) {
-              setIsDragging(true);
-              setIsSelected(false);
-              const id = e.target.id;
-              const splitted = id.split("_");
-              const index = Number(splitted[0]);
-              const selectedDate = dayjs(splitted[1]);
-
-              setFirstSelectedDate(selectedDate);
-              setFirstSelectedIndex(index);
-              setLastSelectedDate(selectedDate);
-              setLastSelectedIndex(index);
-            }
-          }}
-          onMouseMove={(e) => {
-            console.log(e.target.id);
-            if (isDragging()) {
-              const containTimeSlot = e.target.classList.contains("timeslot");
-
-              if (containTimeSlot) {
-                const id = e.target.id;
-                const splitted = id.split("_");
-                const index = Number(splitted[0]);
-                const selectedDate = dayjs(splitted[1]);
-                const hour = selectedDate.hour();
-                const minute = selectedDate.minute();
-
-                const lastDate = firstSelectedDate()
-                  ?.clone()
-                  .hour(hour)
-                  .minute(minute);
-
-                setLastSelectedDate(lastDate!);
-                setLastSelectedIndex(index);
-              }
-            }
-          }}
-          onMouseUp={(e) => {
-            if (isDragging()) {
-              setIsDragging(false);
-              setIsSelected(true);
-
-              const start = isFirstAfterLast()
-                ? lastSelectedDate()
-                : firstSelectedDate();
-              const end = isFirstAfterLast()
-                ? firstSelectedDate()
-                : lastSelectedDate();
-              const firstIndex = isFirstAfterLast()
-                ? lastSelectedIndex()
-                : firstSelectedIndex();
-              const endIndex = isFirstAfterLast()
-                ? firstSelectedIndex()
-                : lastSelectedIndex();
-
-              addSelectedTimeBlock({
-                start: start!,
-                end: end!,
-                firstIndex: firstIndex!,
-                lastIndex: endIndex!,
-              });
-            }
-          }}
-        >
+        <div class="relative border">
           <ScheduleDayColumn day={day} />
+          <Show when={draggingTimeBlock()?.start.isSame(day, "day")}>
+            <div
+              class={
+                "absolute z-10 w-full rounded-lg bg-primary drop-shadow-xl"
+              }
+              style={{
+                top: draggingTop(),
+                height: draggingHeight(),
+                "pointer-events": "none",
+              }}
+            >
+              <div class="absolute top-0 text-xs text-white">
+                {draggingText()}
+              </div>
+            </div>
+          </Show>
           <For each={timeBlocks()}>
             {(timeBlock) => {
               const top = () => {
@@ -152,98 +100,45 @@ const ScheduleWeekColumn = () => {
                   (timeBlock.lastIndex - timeBlock.firstIndex + 1) * 14;
                 return `${heightNum}px`;
               };
-
-              const timeBlockZIndex = () => {
-                const largerTimeBlocks = timeBlockInSameDay().filter((e) => {
-                  return (
-                    e.start.isBefore(timeBlock.start) &&
-                    e.end.isAfter(timeBlock.end)
-                  );
-                });
-
-                return largerTimeBlocks.length + 1;
+              const dateSelectedText = () => {
+                return `${timeBlock.start.format("HH:mm")} ~ ${timeBlock.end?.format("HH:mm")}`;
               };
 
-              const largerTimeBlocks = () => {
-                const blocks = timeBlockInSameDay().filter((e) => {
-                  return (
-                    (e.start.isBefore(timeBlock.start) &&
-                      e.end.isAfter(timeBlock.end)) ||
-                    (e.start.isAfter(timeBlock.start) &&
-                      e.end.isBefore(timeBlock.end))
-                  );
-                });
+              const timeOverlaps = () => {
+                const overlappingTimeBlocks = timeBlockInSameDay().filter(
+                  (e) => {
+                    const isAfterAndBefore =
+                      e.start.isAfter(timeBlock.start) &&
+                      e.end.isBefore(timeBlock.end);
+                    const isBeforeAndAfter =
+                      e.start.isBefore(timeBlock.start) &&
+                      e.end.isAfter(timeBlock.end);
 
-                blocks.push(timeBlock);
-
-                const sortedBlocks = blocks.sort((a, b) => {
-                  if (a.start.isBefore(b.start)) {
-                    return -1;
-                  }
-                  if (a.start.isAfter(b.start)) {
-                    return 1;
-                  }
-                  return 0;
-                });
-
-                return sortedBlocks;
-              };
-
-              const currentTimeBlockIndexBetweenLargerTimeBlocks = () => {
-                return largerTimeBlocks().indexOf(timeBlock);
-              };
-
-              const left = () => {
-                if (largerTimeBlocks().length == 0) {
-                  return "0%";
-                }
-
-                if (currentTimeBlockIndexBetweenLargerTimeBlocks() == 0) {
-                  return "0%";
-                }
-
-                console.log(
-                  "currentTimeBlockIndexBetweenLargerTimeBlocks()",
-                  currentTimeBlockIndexBetweenLargerTimeBlocks(),
+                    return isAfterAndBefore || isBeforeAndAfter;
+                  },
                 );
 
-                const leftNum =
-                  100 / (currentTimeBlockIndexBetweenLargerTimeBlocks() + 1);
+                overlappingTimeBlocks.push(timeBlock);
 
-                console.log("leftNum", leftNum);
+                const sortedOverlappingTimeBlocks = overlappingTimeBlocks.sort(
+                  (a, b) => {
+                    return a.start.valueOf() - b.start.valueOf();
+                  },
+                );
 
-                return `${leftNum}%`;
+                return sortedOverlappingTimeBlocks;
               };
 
               const width = () => {
-                if (largerTimeBlocks().length == 1) {
-                  return "100%";
-                }
-
-                const widthNum = 100 / largerTimeBlocks().length;
-                console.log("widthNum", widthNum);
+                const widthNum = 100 / timeOverlaps().length;
                 return `${widthNum}%`;
               };
 
-              const overlapTimeBlocks = () => {
-                return timeBlockInSameDay().filter((e) => {
-                  const overlapAtStart =
-                    e.start.isBefore(timeBlock.start) &&
-                    e.end.isAfter(timeBlock.start);
-                  const overlapAtEnd =
-                    e.start.isBefore(timeBlock.end) &&
-                    e.end.isAfter(timeBlock.end);
-
-                  return overlapAtStart || overlapAtEnd;
-                });
-              };
-
-              const dateSelectedText = () => {
-                return `${timeBlock.start.format("HH:mm")} ~ ${timeBlock.end?.clone().add(15, "minute").format("HH:mm")}`;
-              };
-
-              const quarters = () => {
-                return timeBlock.lastIndex - timeBlock.firstIndex + 1;
+              const left = () => {
+                const leftNum =
+                  (timeOverlaps().indexOf(timeBlock) * 100) /
+                  timeOverlaps().length;
+                return `${leftNum}%`;
               };
 
               return (
@@ -251,22 +146,39 @@ const ScheduleWeekColumn = () => {
                   <div
                     class={
                       isSelectedTimeBlock()
-                        ? "absolute z-10 rounded-lg bg-primary drop-shadow-xl"
+                        ? "absolute z-10 w-full rounded-lg bg-primary drop-shadow-xl"
                         : "hidden"
                     }
                     style={{
                       top: top(),
-                      left: left(),
                       height: height(),
                       width: width(),
-                      "pointer-events": isDragging() ? "none" : "all",
-                      opacity: isDragging() ? 0.5 : 1,
+                      left: left(),
+                      opacity: isDragging() ? "0.5" : "1",
+                      "pointer-events": isDragging() ? "none" : "auto",
                     }}
                     draggable={true}
                     onDragStart={(e) => {
                       e.dataTransfer?.setDragImage(new Image(), 0, 0);
+                      setDragged(timeBlock);
+                      setIsDragging(true);
+                    }}
+                    onDragEnd={() => {
+                      setIsDragging(false);
+                      const newTimeBlock = () => draggingTimeBlock();
+                      addSelectedTimeBlock(newTimeBlock()!);
+                      setDraggingTimeBlock(undefined);
+                      removeSelectedTimeBlock(timeBlock);
                     }}
                   >
+                    <div
+                      class="absolute right-3 top-0 cursor-pointer text-white"
+                      onClick={() => {
+                        removeSelectedTimeBlock(timeBlock);
+                      }}
+                    >
+                      x
+                    </div>
                     <div class="absolute top-0 text-xs text-white">
                       {dateSelectedText()}
                     </div>

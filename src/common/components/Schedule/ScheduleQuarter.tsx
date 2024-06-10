@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { useSchedule } from "./ScheduleProvider";
+import { TimeBlockSelectModeType, useSchedule } from "./ScheduleProvider";
 import { Match, Show, Switch } from "solid-js";
 
 interface IScheduleQuarterProps {
@@ -9,78 +9,137 @@ interface IScheduleQuarterProps {
 }
 
 const ScheduleQuarter = (props: IScheduleQuarterProps) => {
-  const { firstSelectedDate, lastSelectedDate, isSelected } = useSchedule();
-  const firstIsAfterLast = () => {
-    if (firstSelectedDate() == null || lastSelectedDate() == null) {
-      return false;
+  const {
+    timeBlockSelectMode,
+    addSelectedTimeBlock,
+    setDraggingTimeBlock,
+    dragged,
+    setDragged,
+  } = useSchedule();
+
+  const handleClick = () => {
+    switch (timeBlockSelectMode()) {
+      case "30min":
+        addSelectedTimeBlock({
+          start: props.day,
+          end: props.day.add(30, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 1,
+        });
+        break;
+      case "45min":
+        addSelectedTimeBlock({
+          start: props.day,
+          end: props.day.add(45, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 2,
+        });
+        break;
+      case "60min":
+        addSelectedTimeBlock({
+          start: props.day,
+          end: props.day.add(60, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 3,
+        });
+        break;
+      case "90min":
+        addSelectedTimeBlock({
+          start: props.day,
+          end: props.day.add(90, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 5,
+        });
+        break;
+      case "120min":
+        addSelectedTimeBlock({
+          start: props.day,
+          end: props.day.add(120, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 7,
+        });
+        break;
+      case "240min":
+        addSelectedTimeBlock({
+          start: props.day,
+          end: props.day.add(240, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 15,
+        });
+        break;
+      default:
+        break;
     }
-    return firstSelectedDate()?.isAfter(lastSelectedDate());
   };
-  const isFirstSelected = () => {
-    if (firstSelectedDate() == null) {
-      return false;
-    }
 
-    if (firstIsAfterLast()) {
-      return props.day.isSame(lastSelectedDate());
+  const handleDragOver = (timeBlockSelectMode: TimeBlockSelectModeType) => {
+    switch (timeBlockSelectMode) {
+      case "30min":
+        setDraggingTimeBlock({
+          start: props.day,
+          end: props.day.add(30, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 1,
+        });
+        break;
+      case "45min":
+        setDraggingTimeBlock({
+          start: props.day,
+          end: props.day.add(45, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 2,
+        });
+        break;
+      case "60min":
+        setDraggingTimeBlock({
+          start: props.day,
+          end: props.day.add(60, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 3,
+        });
+        break;
+      case "90min":
+        setDraggingTimeBlock({
+          start: props.day,
+          end: props.day.add(90, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 5,
+        });
+        break;
+      case "120min":
+        setDraggingTimeBlock({
+          start: props.day,
+          end: props.day.add(120, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 7,
+        });
+        break;
+      case "240min":
+        setDraggingTimeBlock({
+          start: props.day,
+          end: props.day.add(240, "minutes"),
+          firstIndex: props.quarterIndex + props.hourIndex * 4,
+          lastIndex: props.quarterIndex + props.hourIndex * 4 + 15,
+        });
+        break;
+      default:
+        break;
     }
-
-    return props.day.isSame(firstSelectedDate());
   };
-
-  const isLastSelected = () => {
-    if (lastSelectedDate() == null) {
-      return false;
-    }
-
-    if (firstIsAfterLast()) {
-      return props.day.isSame(firstSelectedDate());
-    }
-
-    return props.day.isSame(lastSelectedDate());
-  };
-
-  const isBetweenSelected = () => {
-    if (firstSelectedDate() == null || lastSelectedDate() == null) {
-      return false;
-    }
-
-    if (firstIsAfterLast()) {
-      return (
-        props.day.isBefore(firstSelectedDate()) &&
-        props.day.isAfter(lastSelectedDate())
-      );
-    } else {
-      return (
-        props.day.isAfter(firstSelectedDate()) &&
-        props.day.isBefore(lastSelectedDate())
-      );
-    }
-  };
-
-  const isSelectedDay = () =>
-    isFirstSelected() || isLastSelected() || isBetweenSelected();
 
   return (
-    <div class={"relative z-0 h-[14px] w-full"}>
-      <div
-        class="timeslot absolute z-50 h-[14px] w-full bg-transparent"
-        style={{
-          "border-top-left-radius": isFirstSelected() ? "4px" : "0px",
-          "border-top-right-radius": isFirstSelected() ? "4px" : "0px",
-          "border-bottom-left-radius": isLastSelected() ? "4px" : "0px",
-          "border-bottom-right-radius": isLastSelected() ? "4px" : "0px",
-        }}
-        id={
-          (props.quarterIndex + props.hourIndex * 4).toString() +
-          "_" +
-          props.day.toISOString()
-        }
-      ></div>
-      <Show when={isSelectedDay() && !isSelected()}>
-        <div class="absolute z-40 h-[14px] w-full bg-primary"></div>
-      </Show>
-    </div>
+    <div
+      class="h-[14px] w-full"
+      onClick={() => {
+        handleClick();
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        const type = dragged()?.end.diff(dragged()?.start, "minutes");
+        console.log("dragover", type);
+        handleDragOver(`${type}min` as TimeBlockSelectModeType);
+      }}
+    ></div>
   );
 };
 

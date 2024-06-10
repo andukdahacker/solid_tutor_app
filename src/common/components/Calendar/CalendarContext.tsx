@@ -8,7 +8,6 @@ import {
   useContext,
 } from "solid-js";
 import { unwrap } from "solid-js/store";
-import { i } from "vite/dist/node/types.d-AKzkD8vd";
 
 type CalendarView = "month" | "year" | "century";
 
@@ -32,13 +31,22 @@ interface ICalendarContext {
 
 const CalendarContext = createContext<ICalendarContext>();
 
-const CalendarProvider = (props: ParentProps) => {
+interface ICalendarProviderProps {
+  initialDate?: Date;
+  onSelectDate: (date: Date) => void;
+}
+
+const CalendarProvider = (props: ParentProps<ICalendarProviderProps>) => {
+  const initialDate = props.initialDate ? dayjs(props.initialDate) : dayjs();
+
   const [calendarView, setCalendarView] = createSignal<CalendarView>("month");
-  const [selectedDate, setSelectedDate] = createSignal(dayjs());
-  const [currentDateView, setCurrentDateView] = createSignal(dayjs());
-  const [currentYearView, setCurrentYearView] = createSignal(dayjs().year());
+  const [selectedDate, setSelectedDate] = createSignal(initialDate);
+  const [currentDateView, setCurrentDateView] = createSignal(initialDate);
+  const [currentYearView, setCurrentYearView] = createSignal(
+    initialDate.year(),
+  );
   const [yearPeriodStart, setYearPeriodStart] = createSignal(
-    dayjs().subtract(23, "years").year(),
+    initialDate.subtract(23, "years").year(),
   );
   const [yearPeriodEnd, setYearPeriodEnd] = createSignal(dayjs().year());
 
@@ -122,6 +130,10 @@ const CalendarProvider = (props: ParentProps) => {
         break;
     }
   };
+
+  createEffect(() => {
+    props.onSelectDate(selectedDate().toDate());
+  });
 
   return (
     <CalendarContext.Provider

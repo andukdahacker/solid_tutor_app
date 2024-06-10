@@ -10,31 +10,41 @@ import {
 
 interface ScheduleProviderProps {
   defaultTime: dayjs.Dayjs;
+  onUpdateTimeBlocks: (timeBlock: ITimeBlock[]) => void;
 }
+
+export const TimeBlockSelectMode = {
+  30: "30min",
+  45: "45min",
+  60: "60min",
+  90: "90min",
+  120: "120min",
+  240: "240min",
+  480: "480min",
+} as const;
+
+export type TimeBlockSelectModeType =
+  (typeof TimeBlockSelectMode)[keyof typeof TimeBlockSelectMode];
 
 interface IScheduleContext {
   currentTime: Accessor<dayjs.Dayjs>;
   next: () => void;
   prev: () => void;
-  firstSelectedDate: Accessor<dayjs.Dayjs | null>;
-  setFirstSelectedDate: (date: dayjs.Dayjs | null) => void;
-  lastSelectedDate: Accessor<dayjs.Dayjs | null>;
-  setLastSelectedDate: (date: dayjs.Dayjs | null) => void;
-  firstSelectedIndex: Accessor<number | null>;
-  setFirstSelectedIndex: (index: number | null) => void;
-  lastSelectedIndex: Accessor<number | null>;
-  setLastSelectedIndex: (index: number | null) => void;
-  isDragging: Accessor<boolean>;
-  setIsDragging: (isDragging: boolean) => void;
-  isSelected: Accessor<boolean>;
-  setIsSelected: (isSelected: boolean) => void;
+  timeBlockSelectMode: Accessor<TimeBlockSelectModeType>;
+  setTimeBlockSelectMode: (mode: TimeBlockSelectModeType) => void;
   timeBlocks: Accessor<ITimeBlock[]>;
   setTimeBlocks: (timeBlocks: ITimeBlock[]) => void;
   addSelectedTimeBlock: (timeBlock: ITimeBlock) => void;
   removeSelectedTimeBlock: (timeBlock: ITimeBlock) => void;
+  isDragging: Accessor<boolean>;
+  setIsDragging: (isDragging: boolean) => void;
+  draggingTimeBlock: Accessor<ITimeBlock | undefined>;
+  setDraggingTimeBlock: (timeBlock: ITimeBlock | undefined) => void;
+  dragged: Accessor<ITimeBlock | undefined>;
+  setDragged: (timeBlock: ITimeBlock | undefined) => void;
 }
 
-interface ITimeBlock {
+export interface ITimeBlock {
   start: dayjs.Dayjs;
   end: dayjs.Dayjs;
   firstIndex: number;
@@ -45,24 +55,12 @@ const ScheduleContext = createContext<IScheduleContext>();
 
 const ScheduleProvider = (props: ParentProps<ScheduleProviderProps>) => {
   const [currentTime, setCurrentTime] = createSignal(props.defaultTime);
-
-  const [firstSelectedDate, setFirstSelectedDate] =
-    createSignal<dayjs.Dayjs | null>(null);
-  const [lastSelectedDate, setLastSelectedDate] =
-    createSignal<dayjs.Dayjs | null>(null);
-
-  const [firstSelectedIndex, setFirstSelectedIndex] = createSignal<
-    number | null
-  >(null);
-  const [lastSelectedIndex, setLastSelectedIndex] = createSignal<number | null>(
-    null,
-  );
-
+  const [timeBlockSelectMode, setTimeBlockSelectMode] =
+    createSignal<TimeBlockSelectModeType>("30min");
   const [timeBlocks, setTimeBlocks] = createSignal<ITimeBlock[]>([]);
-
   const [isDragging, setIsDragging] = createSignal(false);
-
-  const [isSelected, setIsSelected] = createSignal(false);
+  const [dragged, setDragged] = createSignal<ITimeBlock>();
+  const [draggingTimeBlock, setDraggingTimeBlock] = createSignal<ITimeBlock>();
 
   const next = () => {
     setCurrentTime(currentTime().add(7, "days"));
@@ -86,28 +84,28 @@ const ScheduleProvider = (props: ParentProps<ScheduleProviderProps>) => {
     });
   };
 
+  createEffect(() => {
+    props.onUpdateTimeBlocks(timeBlocks());
+  });
+
   return (
     <ScheduleContext.Provider
       value={{
         currentTime,
         next,
         prev,
-        firstSelectedDate,
-        setFirstSelectedDate,
-        lastSelectedDate,
-        setLastSelectedDate,
-        firstSelectedIndex,
-        setFirstSelectedIndex,
-        lastSelectedIndex,
-        setLastSelectedIndex,
-        isDragging,
-        setIsDragging,
-        isSelected,
-        setIsSelected,
+        timeBlockSelectMode,
+        setTimeBlockSelectMode,
         timeBlocks,
         setTimeBlocks,
         addSelectedTimeBlock,
         removeSelectedTimeBlock,
+        isDragging,
+        setIsDragging,
+        draggingTimeBlock,
+        setDraggingTimeBlock,
+        dragged,
+        setDragged,
       }}
     >
       {props.children}
